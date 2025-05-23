@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 
 export default function Register() {
   const [form, setForm] = useState({ email: '', username: '', password: '' });
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -11,11 +13,11 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await api.post('/auth/register', form);
-      localStorage.setItem('token', res.data.access_token);
-      alert('Inscription réussie !');
+      await api.post('/auth/register', form);
+      alert('Inscription réussie ! Connectez-vous maintenant.');
+      navigate('/login');
     } catch (err) {
-      alert('Erreur lors de l’inscription');
+      alert("Erreur lors de l'inscription");
     }
   };
 

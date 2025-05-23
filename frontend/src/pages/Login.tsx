@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -13,11 +15,12 @@ export default function Login() {
     try {
       const res = await api.post('/auth/login', form);
       localStorage.setItem('token', res.data.access_token);
-      alert('Connexion réussie !');
+      navigate('/chat');
     } catch (err) {
       alert('Email ou mot de passe incorrect');
     }
   };
+  
 
   return (
     <form onSubmit={handleSubmit}>

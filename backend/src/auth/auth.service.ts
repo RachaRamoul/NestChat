@@ -13,7 +13,12 @@ export class AuthService {
   async register(email: string, username: string, password: string) {
     const hashed = await bcrypt.hash(password, 10);
     const user = await this.usersService.createUser({ email, username, password: hashed });
-    return this.jwtService.sign({ sub: user.id, email: user.email });
+
+    return this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+    });
   }
 
   async login(email: string, password: string) {
@@ -23,6 +28,10 @@ export class AuthService {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    return this.jwtService.sign({ sub: user.id, email: user.email });
+    return this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+    });
   }
 }
