@@ -43,7 +43,6 @@ export default function Chat() {
       socket.off('private-message');
     };
   }, [username]);
-  
 
   const openChatWith = (user: string) => {
     setSelectedUser(user);
@@ -61,42 +60,133 @@ export default function Chat() {
 
     setMessages((prev) => [
       ...prev,
-      { from: 'Moi → ' + selectedUser, message: text, color }, 
+      { from: 'Moi → ' + selectedUser, message: text, color },
     ]);
-        setText('');
+    setText('');
   };
 
-
   const updateColor = async () => {
-    const token = localStorage.getItem('token');  
     try {
       await api.patch('/users/color', { color });
-  
       const meRes = await api.get('/users/me');
       setColor(meRes.data.color);
-  
       socket.emit('login', username);
       alert('Couleur mise à jour !');
-    } catch (err: any) {
+    } catch {
       alert('Erreur lors de la mise à jour de la couleur');
     }
   };
-  
+
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h2>Bienvenue, {username}</h2>
-
-      <h3>Utilisateurs connectés</h3>
-      <ul>
-        {users.map((user) => (
-          <li key={user}>
-            <button onClick={() => openChatWith(user)}>
-              Discuter avec {user}
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #dce6f9, #efe3ff)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: 'Segoe UI, sans-serif',
+        padding: '2rem',
+      }}
+    >
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '2.5rem 3rem',
+          borderRadius: '20px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+          width: '100%',
+          maxWidth: '500px',
+          textAlign: 'center',
+        }}
+      >
+        <h2 style={{ fontSize: '2.2rem', marginBottom: '1rem' }}>
+          Bienvenue, <span style={{ color }}>{username}</span>
+        </h2>
+  
+        <div style={{ marginTop: '0.5rem' }}>
+          <h3 style={{ fontWeight: 600, marginBottom: '1rem', color: '#334e68' }}>
+            Changer la couleur de ton profil
+          </h3>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              style={{
+                height: '40px',
+                width: '60px',
+                border: '2px solid #ccc',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            />
+            <button
+              onClick={updateColor}
+              style={{
+                background: '#5a7de0',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.5rem 1.2rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'background 0.3s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#7b9dfc')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#5a7de0')}
+            >
+              Mettre à jour
             </button>
-          </li>
-        ))}
-      </ul>
-
+          </div>
+        </div>
+  
+        <h3 style={{ marginTop: '2rem', fontSize: '1.2rem', color: '#334e68' }}>
+          Utilisateurs connectés
+        </h3>
+        <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
+          {users.map((user) => (
+            <li key={user} style={{ marginBottom: '0.5rem' }}>
+              <button
+                onClick={() => openChatWith(user)}
+                style={{
+                  background: '#5a7de0',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '0.5rem 1rem',
+                  cursor: 'pointer',
+                  transition: 'background 0.3s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#7b9dfc')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#5a7de0')}
+              >
+                Discuter avec {user}
+              </button>
+            </li>
+          ))}
+        </ul>
+  
+        <button
+          onClick={handleLogout}
+          style={{
+            marginTop: '2rem',
+            background: '#dc2626',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '0.75rem 2rem',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            transition: 'background 0.3s ease',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = '#f87171')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = '#dc2626')}
+        >
+          Déconnexion
+        </button>
+      </div>
+  
       {isModalOpen && selectedUser && (
         <div style={{
           position: 'fixed',
@@ -131,16 +221,16 @@ export default function Chat() {
               {messages
                 .filter(msg => msg.from === selectedUser || msg.from === `Moi → ${selectedUser}`)
                 .map((msg, i) => (
-                <div key={i} style={{ color: msg.color || '#000' }}>
-                  <strong>{msg.from}:</strong> {msg.message}
-                </div>
+                  <div key={i} style={{ color: msg.color || '#000' }}>
+                    <strong>{msg.from}:</strong> {msg.message}
+                  </div>
               ))}
             </div>
             <input
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Écris ton message..."
-              style={{ width: '100%', marginBottom: '0.5rem' }}
+              style={{ width: '100%', marginBottom: '0.5rem', padding: '0.5rem' }}
             />
             <button onClick={sendMessage} style={{ marginRight: '0.5rem' }}>
               Envoyer
@@ -151,20 +241,7 @@ export default function Chat() {
           </div>
         </div>
       )}
-
-      <div style={{ marginTop: '2rem' }}>
-        <h3>Changer la couleur de ton profil</h3>
-        <input
-          type="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-          style={{ marginRight: '1rem' }}
-        />
-        <button onClick={updateColor}>Mettre à jour</button>
-      </div>
-
-      <button onClick={handleLogout} style={{ marginTop: '2rem' }}>Déconnexion</button>
-
     </div>
   );
+  
 }
