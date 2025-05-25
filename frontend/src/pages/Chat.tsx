@@ -104,6 +104,7 @@ export default function Chat() {
           Bienvenue, <span style={{ color }}>{username}</span>
         </h2>
   
+        {/* Couleur */}
         <div style={{ marginTop: '0.5rem' }}>
           <h3 style={{ fontWeight: 600, marginBottom: '1rem', color: '#334e68' }}>
             Changer la couleur de ton profil
@@ -141,6 +142,7 @@ export default function Chat() {
           </div>
         </div>
   
+        {/* Utilisateurs connectés */}
         <h3 style={{ marginTop: '2rem', fontSize: '1.2rem', color: '#334e68' }}>
           Utilisateurs connectés
         </h3>
@@ -167,6 +169,7 @@ export default function Chat() {
           ))}
         </ul>
   
+        {/* Déconnexion */}
         <button
           onClick={handleLogout}
           style={{
@@ -187,6 +190,7 @@ export default function Chat() {
         </button>
       </div>
   
+      {/* Modale */}
       {isModalOpen && selectedUser && (
         <div style={{
           position: 'fixed',
@@ -194,7 +198,7 @@ export default function Chat() {
           left: 0,
           width: '100vw',
           height: '100vh',
-          backdropFilter: 'blur(4px)',
+          backdropFilter: 'blur(5px)',
           backgroundColor: 'rgba(0,0,0,0.3)',
           display: 'flex',
           justifyContent: 'center',
@@ -202,46 +206,94 @@ export default function Chat() {
           zIndex: 1000,
         }}>
           <div style={{
-            backgroundColor: 'white',
-            padding: '1.5rem',
-            borderRadius: '12px',
-            width: '400px',
+            backgroundColor: '#ffffff',
+            padding: '2rem',
+            borderRadius: '20px',
+            width: '90%',
+            maxWidth: '500px',
             maxHeight: '80vh',
             overflowY: 'auto',
-            boxShadow: '0 0 15px rgba(0,0,0,0.4)',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+            fontFamily: 'Segoe UI, sans-serif',
           }}>
-            <h3>Discussion avec {selectedUser}</h3>
+            <h3 style={{ fontSize: '1.4rem', marginBottom: '1rem', color: '#334e68' }}>
+              Discussion avec <span style={{ fontWeight: 600 }}>{selectedUser}</span>
+            </h3>
+  
             <div style={{
-              margin: '1rem 0',
+              marginBottom: '1rem',
               maxHeight: '300px',
               overflowY: 'auto',
               border: '1px solid #ccc',
-              padding: '0.5rem',
+              padding: '0.75rem',
+              borderRadius: '8px',
             }}>
               {messages
                 .filter(msg => msg.from === selectedUser || msg.from === `Moi → ${selectedUser}`)
                 .map((msg, i) => (
-                  <div key={i} style={{ color: msg.color || '#000' }}>
+                  <div key={i} style={{ color: msg.color || '#000', marginBottom: '0.5rem' }}>
                     <strong>{msg.from}:</strong> {msg.message}
                   </div>
               ))}
             </div>
-            <input
+  
+            <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Écris ton message..."
-              style={{ width: '100%', marginBottom: '0.5rem', padding: '0.5rem' }}
+              rows={3}
+              style={{
+                width: '100%',
+                marginBottom: '1rem',
+                padding: '0.6rem',
+                border: '1px solid #ccc',
+                borderRadius: '6px',
+                fontSize: '1rem',
+                resize: 'none',
+              }}
             />
-            <button onClick={sendMessage} style={{ marginRight: '0.5rem' }}>
-              Envoyer
-            </button>
-            <button onClick={() => setIsModalOpen(false)}>
-              Fermer
-            </button>
+  
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button
+                onClick={sendMessage}
+                style={{
+                  background: '#5a7de0',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '0.5rem 1rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'background 0.3s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#7b9dfc')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#5a7de0')}
+              >
+                Envoyer
+              </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '0.5rem 1rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'background 0.3s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#f0f0f0')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#e0e0e0')}
+              >
+                Fermer
+              </button>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
+  
   
 }
