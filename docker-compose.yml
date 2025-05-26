@@ -6,6 +6,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - ./backend/.env:/app/.env 
     ports:
       - "3000:3000"
     environment:

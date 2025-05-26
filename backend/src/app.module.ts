@@ -4,6 +4,10 @@ import { UsersModule } from './users/users.module';
 import { ChatModule } from './chat/chat.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ChatModule],
+  imports: [
+    AuthModule,
+    UsersModule,
+    ChatModule,
+  ],
 })
 export class AppModule {}
