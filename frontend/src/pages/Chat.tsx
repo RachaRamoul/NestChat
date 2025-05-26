@@ -13,6 +13,7 @@ export default function Chat() {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [color, setColor] = useState('');
+  const [unread, setUnread] = useState<Record<string, number>>({});
 
   const username = getUsernameFromToken() ?? 'Inconnu';
   const navigate = useNavigate();
@@ -35,6 +36,13 @@ export default function Chat() {
   
     socket.on('private-message', (data: { from: string; message: string; color?: string }) => {
       setMessages((prev) => [...prev, data]);
+  
+      if (!(data.from === selectedUser && isModalOpen)) {
+        setUnread((prev) => ({
+          ...prev,
+          [data.from]: (prev[data.from] || 0) + 1,
+        }));
+      }
     });
   
     return () => {
@@ -42,13 +50,30 @@ export default function Chat() {
       socket.off('users:list');
       socket.off('private-message');
     };
-  }, [username]);
+  }, [username, selectedUser, isModalOpen]);
+
+  useEffect(() => {
+    if (selectedUser && isModalOpen) {
+      setUnread((prev) => {
+        const updated = { ...prev };
+        delete updated[selectedUser];
+        return updated;
+      });
+    }
+  }, [selectedUser, isModalOpen, messages]);
+  
 
   const openChatWith = (user: string) => {
+    setUnread((prev) => {
+      const updated = { ...prev };
+      delete updated[user]; 
+      return updated;
+    });
+  
     setSelectedUser(user);
     setIsModalOpen(true);
   };
-
+  
   const sendMessage = () => {
     if (!text.trim() || !selectedUser) return;
 
@@ -147,26 +172,44 @@ export default function Chat() {
           Utilisateurs connectés
         </h3>
         <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
-          {users.map((user) => (
-            <li key={user} style={{ marginBottom: '0.5rem' }}>
-              <button
-                onClick={() => openChatWith(user)}
-                style={{
-                  background: '#5a7de0',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '0.5rem 1rem',
-                  cursor: 'pointer',
-                  transition: 'background 0.3s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#7b9dfc')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '#5a7de0')}
-              >
-                Discuter avec {user}
-              </button>
-            </li>
-          ))}
+        {users.map((user) => (
+          <li key={user} style={{ marginBottom: '0.5rem', position: 'relative' }}>
+            <button
+              onClick={() => openChatWith(user)}
+              style={{
+                position: 'relative',
+                background: '#5a7de0',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.5rem 1rem',
+                cursor: 'pointer',
+                transition: 'background 0.3s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#7b9dfc')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#5a7de0')}
+            >
+              Discuter avec {user}
+              {unread[user] > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-6px',
+                    right: '-10px',
+                    background: 'red',
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    padding: '2px 6px',
+                    borderRadius: '12px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {unread[user]}
+                </span>
+              )}
+            </button>
+          </li>
+        ))}
         </ul>
   
         {/* Déconnexion */}
