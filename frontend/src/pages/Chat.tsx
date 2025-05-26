@@ -14,16 +14,25 @@ export default function Chat() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [color, setColor] = useState('');
   const [unread, setUnread] = useState<Record<string, number>>({});
+  const [statusMessage, setStatusMessage] = useState('');
 
   const username = getUsernameFromToken() ?? 'Inconnu';
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('messages');
     navigate('/login');
   };
+  
 
   useEffect(() => {
+
+    const savedMessages = localStorage.getItem('messages');
+      if (savedMessages) {
+        setMessages(JSON.parse(savedMessages));
+      }
+
     socket.emit('login', username);
   
     socket.on('your-color', (serverColor: string) => {
@@ -35,7 +44,11 @@ export default function Chat() {
     });
   
     socket.on('private-message', (data: { from: string; message: string; color?: string }) => {
-      setMessages((prev) => [...prev, data]);
+      setMessages((prev) => {
+        const updated = [...prev, data];
+        localStorage.setItem('messages', JSON.stringify(updated));
+        return updated;
+      });      
   
       if (!(data.from === selectedUser && isModalOpen)) {
         setUnread((prev) => ({
@@ -83,10 +96,12 @@ export default function Chat() {
       color,
     });
 
-    setMessages((prev) => [
-      ...prev,
-      { from: 'Moi → ' + selectedUser, message: text, color },
-    ]);
+    setMessages((prev) => {
+      const updated = [...prev, { from: 'Moi', message: text, color }];
+      localStorage.setItem('messages', JSON.stringify(updated));
+      return updated;
+    });
+        
     setText('');
   };
 
@@ -96,10 +111,11 @@ export default function Chat() {
       const meRes = await api.get('/users/me');
       setColor(meRes.data.color);
       socket.emit('login', username);
-      alert('Couleur mise à jour !');
+      setStatusMessage('Couleur mise à jour avec succès !');
+      setTimeout(() => setStatusMessage(''), 3000);
     } catch {
-      alert('Erreur lors de la mise à jour de la couleur');
-    }
+      setStatusMessage("Erreur lors de la mise à jour de la couleur.");
+    }    
   };
 
   return (
@@ -128,6 +144,22 @@ export default function Chat() {
         <h2 style={{ fontSize: '2.2rem', marginBottom: '1rem' }}>
           Bienvenue, <span style={{ color }}>{username}</span>
         </h2>
+
+        {statusMessage && (
+          <div style={{
+            marginBottom: '1rem',
+            padding: '0.75rem',
+            backgroundColor: '#e0f2fe',
+            color: '#0369a1',
+            border: '1px solid #7dd3fc',
+            borderRadius: '6px',
+            fontWeight: 500,
+            fontSize: '0.95rem',
+          }}>
+            {statusMessage}
+          </div>
+        )}
+
   
         {/* Couleur */}
         <div style={{ marginTop: '0.5rem' }}>
@@ -172,46 +204,52 @@ export default function Chat() {
           Utilisateurs connectés
         </h3>
         <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
-        {users.map((user) => (
-          <li key={user} style={{ marginBottom: '0.5rem', position: 'relative' }}>
-            <button
-              onClick={() => openChatWith(user)}
-              style={{
-                position: 'relative',
-                background: '#5a7de0',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '0.5rem 1rem',
-                cursor: 'pointer',
-                transition: 'background 0.3s ease',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = '#7b9dfc')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = '#5a7de0')}
-            >
-              Discuter avec {user}
-              {unread[user] > 0 && (
-                <span
+          {users.length === 0 ? (
+            <li style={{ color: '#999', fontStyle: 'italic' }}>
+              Aucun utilisateur connecté pour l’instant
+            </li>
+          ) : (
+            users.map((user) => (
+              <li key={user} style={{ marginBottom: '0.5rem', position: 'relative' }}>
+                <button
+                  onClick={() => openChatWith(user)}
                   style={{
-                    position: 'absolute',
-                    top: '-6px',
-                    right: '-10px',
-                    background: 'red',
+                    position: 'relative',
+                    background: '#5a7de0',
                     color: 'white',
-                    fontSize: '0.75rem',
-                    padding: '2px 6px',
-                    borderRadius: '12px',
-                    fontWeight: 'bold',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '0.5rem 1rem',
+                    cursor: 'pointer',
+                    transition: 'background 0.3s ease',
                   }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#7b9dfc')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#5a7de0')}
                 >
-                  {unread[user]}
-                </span>
-              )}
-            </button>
-          </li>
-        ))}
+                  Discuter avec {user}
+                  {unread[user] > 0 && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-6px',
+                        right: '-10px',
+                        background: 'red',
+                        color: 'white',
+                        fontSize: '0.75rem',
+                        padding: '2px 6px',
+                        borderRadius: '12px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {unread[user]}
+                    </span>
+                  )}
+                </button>
+              </li>
+            ))
+          )}
         </ul>
-  
+
         {/* Déconnexion */}
         <button
           onClick={handleLogout}
@@ -263,22 +301,37 @@ export default function Chat() {
               Discussion avec <span style={{ fontWeight: 600 }}>{selectedUser}</span>
             </h3>
   
-            <div style={{
-              marginBottom: '1rem',
-              maxHeight: '300px',
-              overflowY: 'auto',
-              border: '1px solid #ccc',
-              padding: '0.75rem',
-              borderRadius: '8px',
-            }}>
-              {messages
-                .filter(msg => msg.from === selectedUser || msg.from === `Moi → ${selectedUser}`)
-                .map((msg, i) => (
-                  <div key={i} style={{ color: msg.color || '#000', marginBottom: '0.5rem' }}>
-                    <strong>{msg.from}:</strong> {msg.message}
-                  </div>
-              ))}
+            <div
+              style={{
+                marginBottom: '1rem',
+                maxHeight: '300px',
+                overflowY: 'auto',
+                border: '1px solid #ccc',
+                padding: '0.75rem',
+                borderRadius: '8px',
+                minHeight: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#999',
+                fontStyle: 'italic',
+              }}
+            >
+              {messages.some(msg => msg.from === selectedUser || (msg.from === 'Moi' && selectedUser)) ? (
+                <div style={{ width: '100%' }}>
+                  {messages
+                    .filter(msg => msg.from === selectedUser || msg.from === 'Moi')
+                    .map((msg, i) => (
+                      <div key={i} style={{ color: msg.color || '#000', marginBottom: '0.5rem' }}>
+                        <strong>{msg.from}:</strong> {msg.message}
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <>Commencez la discussion avec <strong>{' '}{selectedUser}</strong> !</>
+              )}
             </div>
+
   
             <textarea
               value={text}
@@ -337,6 +390,5 @@ export default function Chat() {
       )}
     </div>
   );
-  
   
 }

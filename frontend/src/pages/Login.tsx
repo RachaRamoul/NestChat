@@ -4,6 +4,7 @@ import { api } from '../api';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
+  const [statusMessage, setStatusMessage] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,7 +18,8 @@ export default function Login() {
       localStorage.setItem('token', res.data.access_token);
       navigate('/chat');
     } catch (err) {
-      alert('Email ou mot de passe incorrect');
+      setStatusMessage('Email ou mot de passe incorrect');
+      setTimeout(() => setStatusMessage(''), 3000);
     }
   };
 
@@ -37,15 +39,33 @@ export default function Login() {
         onSubmit={handleSubmit}
         style={{
           background: '#ffffff',
-          padding: '2.5rem 3rem',
-          borderRadius: '20px',
+          padding: '2.5rem 2rem',
+          borderRadius: '24px',
           boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
           width: '100%',
           maxWidth: '400px',
-          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
         }}
       >
-        <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', color: '#334e68' }}>Connexion</h2>
+        <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: '#334e68' }}>Connexion</h2>
+
+        {statusMessage && (
+          <div style={{
+            padding: '0.75rem',
+            backgroundColor: '#fee2e2',
+            color: '#b91c1c',
+            border: '1px solid #fca5a5',
+            borderRadius: '6px',
+            fontWeight: 500,
+            fontSize: '0.95rem',
+            width: '100%',
+          }}>
+            {statusMessage}
+          </div>
+        )}
 
         <input
           name="email"
@@ -54,9 +74,8 @@ export default function Login() {
           style={{
             width: '100%',
             padding: '0.75rem 1rem',
-            marginBottom: '1rem',
             border: '1px solid #ccc',
-            borderRadius: '6px',
+            borderRadius: '8px',
             fontSize: '1rem',
           }}
         />
@@ -68,9 +87,8 @@ export default function Login() {
           style={{
             width: '100%',
             padding: '0.75rem 1rem',
-            marginBottom: '1.5rem',
             border: '1px solid #ccc',
-            borderRadius: '6px',
+            borderRadius: '8px',
             fontSize: '1rem',
           }}
         />
@@ -93,6 +111,16 @@ export default function Login() {
         >
           Se connecter
         </button>
+
+        <p style={{ marginTop: '0.5rem', fontSize: '0.95rem' }}>
+          Pas encore de compte ?{' '}
+          <span
+            onClick={() => navigate('/register')}
+            style={{ color: '#5a7de0', textDecoration: 'underline', cursor: 'pointer' }}
+          >
+            Inscrivez-vous
+          </span>
+        </p>
       </form>
     </div>
   );

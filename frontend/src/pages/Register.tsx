@@ -4,6 +4,7 @@ import { api } from '../api';
 
 export default function Register() {
   const [form, setForm] = useState({ email: '', username: '', password: '' });
+  const [statusMessage, setStatusMessage] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -14,10 +15,14 @@ export default function Register() {
     e.preventDefault();
     try {
       await api.post('/auth/register', form);
-      alert('Inscription réussie ! Connectez-vous maintenant.');
-      navigate('/login');
+      setStatusMessage("Inscription réussie ! Connectez-vous maintenant.");
+      setTimeout(() => {
+        setStatusMessage('');
+        navigate('/login');
+      }, 2000);
     } catch (err) {
-      alert("Erreur lors de l'inscription");
+      setStatusMessage("Erreur lors de l'inscription.");
+      setTimeout(() => setStatusMessage(''), 3000);
     }
   };
 
@@ -37,15 +42,34 @@ export default function Register() {
         onSubmit={handleSubmit}
         style={{
           background: '#ffffff',
-          padding: '2.5rem 3rem',
-          borderRadius: '20px',
+          padding: '2.5rem 2rem',
+          borderRadius: '24px',
           boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
           width: '100%',
           maxWidth: '400px',
-          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
         }}
       >
-        <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', color: '#334e68' }}>Inscription</h2>
+        <h2 style={{ fontSize: '2rem', color: '#334e68' }}>Inscription</h2>
+
+        {statusMessage && (
+          <div style={{
+            padding: '0.75rem',
+            backgroundColor: statusMessage.includes('réussie') ? '#dcfce7' : '#fee2e2',
+            color: statusMessage.includes('réussie') ? '#166534' : '#b91c1c',
+            border: '1px solid',
+            borderColor: statusMessage.includes('réussie') ? '#86efac' : '#fca5a5',
+            borderRadius: '6px',
+            fontWeight: 500,
+            fontSize: '0.95rem',
+            width: '100%',
+          }}>
+            {statusMessage}
+          </div>
+        )}
 
         <input
           name="email"
@@ -54,9 +78,8 @@ export default function Register() {
           style={{
             width: '100%',
             padding: '0.75rem 1rem',
-            marginBottom: '1rem',
             border: '1px solid #ccc',
-            borderRadius: '6px',
+            borderRadius: '8px',
             fontSize: '1rem',
           }}
         />
@@ -67,9 +90,8 @@ export default function Register() {
           style={{
             width: '100%',
             padding: '0.75rem 1rem',
-            marginBottom: '1rem',
             border: '1px solid #ccc',
-            borderRadius: '6px',
+            borderRadius: '8px',
             fontSize: '1rem',
           }}
         />
@@ -81,9 +103,8 @@ export default function Register() {
           style={{
             width: '100%',
             padding: '0.75rem 1rem',
-            marginBottom: '1.5rem',
             border: '1px solid #ccc',
-            borderRadius: '6px',
+            borderRadius: '8px',
             fontSize: '1rem',
           }}
         />
@@ -106,6 +127,16 @@ export default function Register() {
         >
           S'inscrire
         </button>
+
+        <p style={{ fontSize: '0.95rem' }}>
+          Vous avez déjà un compte ?{' '}
+          <span
+            onClick={() => navigate('/login')}
+            style={{ color: '#5a7de0', textDecoration: 'underline', cursor: 'pointer' }}
+          >
+            Connectez-vous
+          </span>
+        </p>
       </form>
     </div>
   );

@@ -9,7 +9,6 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Patch('color')
   async updateColor(@Request() req, @Body('color') color: string) {
-    console.log('🎯 req.user reçu dans PATCH /users/color :', req.user);
     return this.usersService.updateColorById(req.user.userId, color);
   }
   
