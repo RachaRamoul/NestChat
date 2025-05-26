@@ -210,43 +210,43 @@ export default function Chat() {
             </li>
           ) : (
             users.map((user) => (
-              <li key={user} style={{ marginBottom: '0.5rem', position: 'relative' }}>
-                <button
-                  onClick={() => openChatWith(user)}
-                  style={{
-                    position: 'relative',
-                    background: '#5a7de0',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '0.5rem 1rem',
-                    cursor: 'pointer',
-                    transition: 'background 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#7b9dfc')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = '#5a7de0')}
-                >
-                  Discuter avec {user}
-                  {unread[user] > 0 && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '-6px',
-                        right: '-10px',
-                        background: 'red',
-                        color: 'white',
-                        fontSize: '0.75rem',
-                        padding: '2px 6px',
-                        borderRadius: '12px',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {unread[user]}
-                    </span>
-                  )}
-                </button>
-              </li>
-            ))
+            <li key={user} style={{ marginBottom: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontWeight: '600', fontSize: '1.1rem' }}>{user}</span>
+                  <button
+                    onClick={() => openChatWith(user)}
+                    style={{
+                      background: '#5a7de0',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '0.4rem 0.8rem',
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Discuter
+                    {unread[user] > 0 && (
+                      <span
+                        style={{
+                          marginLeft: '8px',
+                          background: 'red',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          padding: '2px 6px',
+                          borderRadius: '12px',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {unread[user]}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </li>
+            ))            
           )}
         </ul>
 
@@ -349,7 +349,7 @@ export default function Chat() {
               }}
             />
   
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem'}}>
               <button
                 onClick={sendMessage}
                 style={{
