@@ -4,9 +4,7 @@ Application fullstack avec **NestJS** pour le backend et **React** pour le front
 
 
 ## Lancer le projet
-    1- docker exec -it nestchat-backend sh
-    2- npx prisma generate
-    3- A la racine du projet : docker-compose up --build
+    - A la racine du projet : docker-compose up --build
 
 ## Fonctionnalités
 
